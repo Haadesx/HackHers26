@@ -75,15 +75,7 @@ export function Audit() {
                 <td>{challenge.user_id}</td>
                 <td>{challenge.prompt}</td>
                 <td>{new Date(challenge.created_at).toLocaleString()}</td>
-                <td>
-                  {challenge.decision ? (
-                    <span className={`status-cell ${challenge.decision === "APPROVED" ? "badge-approved" : challenge.decision === "RETRY" ? "badge-retry" : "badge-denied"}`}>
-                      {challenge.decision}
-                    </span>
-                  ) : (
-                    '-'
-                  )}
-                </td>
+                <td>{challenge.decision || '-'}</td>
               </tr>
             ))}
           </tbody>
