@@ -3,13 +3,36 @@ import numpy as np
 from typing import Optional
 from typing import Dict, Any
 
-from backend.app.video.decode import decode_video_bytes
-from backend.app.video.sampling import sample_frames
-from backend.app.video.quality import compute_quality_score
-from backend.app.video.liveness import compute_liveness_score
-from backend.app.video.presage_features import compute_presage_features
-from backend.app.ml.model_loader import load_deepfake_model
-from backend.app.ml.preprocess import preprocess_batch, resize_roi
+from app.video.decode import decode_video_bytes
+from app.video.sampling import sample_frames
+from app.video.quality import compute_quality_score
+from app.video.liveness import compute_liveness_score
+from app.video.presage_features import compute_presage_features
+from app.ml.model_loader import load_deepfake_model
+from app.ml.preprocess import preprocess_batch, resize_roi
+from app.core.logging import get_logger
+
+logger = get_logger(__name__)
+
+def extract_middle_frame_base64(video_bytes: bytes) -> Optional[str]:
+    import base64
+    try:
+        success, frames_array, _ = decode_video_bytes(video_bytes)
+        if not success or frames_array is None or len(frames_array) == 0:
+            return None
+            
+        mid_idx = len(frames_array) // 2
+        mid_frame = frames_array[mid_idx]
+        
+        # Encode to JPEG
+        success_enc, buffer = cv2.imencode('.jpg', mid_frame)
+        if not success_enc:
+            return None
+            
+        return base64.b64encode(buffer).decode('utf-8')
+    except Exception as exc:
+        logger.error("extract_middle_frame_base64 error: %s", exc)
+        return None
 
 
 def detect_face_haar(frame: np.ndarray, cascade: Optional[cv2.CascadeClassifier] = None) -> Optional[tuple]:
@@ -193,7 +216,7 @@ def analyze_video_bytes(video_bytes: bytes, config: Optional[Dict[str, Any]] = N
     for roi in rois:
         if roi is not None and roi.size > 0:
             resized = resize_roi(roi, (224, 224))
-            from backend.app.ml.preprocess import normalize_to_tensor
+            from app.ml.preprocess import normalize_to_tensor
             tensor = normalize_to_tensor(resized)
             preprocessed.append(tensor)
         else:

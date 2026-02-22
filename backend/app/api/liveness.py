@@ -4,6 +4,7 @@ multipart/form-data field: video
 """
 from __future__ import annotations
 import json
+import asyncio
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, UploadFile, File, Query, Depends, HTTPException
@@ -13,7 +14,8 @@ from app.core.logging import get_logger
 from app.core.security import hash_scores
 from app.db import repo
 from app.ml.infer import analyze_video_bytes
-from app.services import gemini_risk, elevenlabs_tts
+from app.services import gemini_risk
+from app.services import presage_service
 from app.services import gateway_fiserv as bank_gw
 from app.services import solana_service as sol_gw
 
@@ -50,14 +52,84 @@ async def liveness_upload(
     video_bytes = await video.read()
     logger.info("liveness_upload challenge=%s bytes=%d", challenge_id, len(video_bytes))
 
-    # 4. ML inference (Agent 2 interface)
-    ml_result = await analyze_video_bytes(video_bytes)
+    # 4. ML inference or DEMO OVERRIDES
+    amount = ch_data.get("amount", 0.0)
+    amount_str = f"{amount:.2f}"
+
+    if amount_str.endswith(".99"):
+        logger.info("DEMO OVERRIDE: Forcing Deepfake FAIL scores for amount %s", amount_str)
+        ml_result = {
+            "deepfake_mean": 0.88,
+            "deepfake_var": 0.15,
+            "liveness": 0.85,
+            "quality": 0.80,
+            "presage": 0.80,
+            "signals": ["using_fake_model", "known_deepfake_signature", "high_temporal_inconsistency"],
+            "presage_raw": {"micro_motion": 0.8, "smoothness": 0.2, "periodicity_proxy": 0.1, "face_presence_ratio": 1.0}
+        }
+    elif amount_str.endswith(".98"):
+        logger.info("DEMO OVERRIDE: Forcing Poor Lighting RETRY scores for amount %s", amount_str)
+        ml_result = {
+            "deepfake_mean": 0.05,
+            "deepfake_var": 0.01,
+            "liveness": 0.30,
+            "quality": 0.20,
+            "presage": 0.15,
+            "signals": ["low_micro_motion", "poor_lighting", "face_obscured"],
+            "presage_raw": {"micro_motion": 0.1, "smoothness": 0.8, "periodicity_proxy": 0.0, "face_presence_ratio": 0.5}
+        }
+    elif amount_str.endswith(".97"):
+        logger.info("DEMO OVERRIDE: Forcing Printed Photo SPOOF FAIL scores for amount %s", amount_str)
+        ml_result = {
+            "deepfake_mean": 0.05,        # Not a deepfake, just a photo
+            "deepfake_var": 0.01,
+            "liveness": 0.10,             # No life
+            "quality": 0.85,              # Good quality photo
+            "presage": 0.05,              # Zero micro-motion
+            "signals": ["no_micro_motion_detected", "static_image_suspected", "physical_spoof_attempt"],
+            "presage_raw": {"micro_motion": 0.0, "smoothness": 1.0, "periodicity_proxy": 0.0, "face_presence_ratio": 1.0}
+        }
+    else:
+        # Normal ML inference — run ML + Presage rPPG + Qwen-VL concurrently for speed
+        from app.ml.infer import extract_middle_frame_base64
+        from app.services.openrouter_service import analyze_frame_for_spoofing
+        
+        async def qwen_task():
+            b64 = await asyncio.to_thread(extract_middle_frame_base64, video_bytes)
+            if b64:
+                return await analyze_frame_for_spoofing(b64)
+            return {"spoof_confidence": 0.0, "vision_flags": []}
+
+        ml_result, presage_result, qwen_result = await asyncio.gather(
+            asyncio.to_thread(analyze_video_bytes, video_bytes),
+            presage_service.analyze_liveness(video_bytes),
+            qwen_task()
+        )
+        # Merge Presage score into ml_result
+        ml_result["presage"] = presage_result["presage_score"]
+        if presage_result["spoofing_flags"]:
+            ml_result["signals"].extend(presage_result["spoofing_flags"])
+            
+        # Merge Qwen-VL score into ml_result
+        ml_result["qwen_spoof_confidence"] = qwen_result["spoof_confidence"]
+        if qwen_result["vision_flags"]:
+            ml_result["signals"].extend(qwen_result["vision_flags"])
+
+        logger.info(
+            "Presage rPPG: mode=%s score=%.3f pulse=%s hr=%s bpm",
+            presage_result["mode"],
+            presage_result["presage_score"],
+            presage_result["pulse_detected"],
+            presage_result["heart_rate_bpm"],
+        )
+
     scores = {
         "deepfake_mean": ml_result["deepfake_mean"],
         "deepfake_var": ml_result["deepfake_var"],
         "liveness": ml_result["liveness"],
         "quality": ml_result["quality"],
         "presage": ml_result["presage"],
+        "qwen_spoof_confidence": ml_result.get("qwen_spoof_confidence", 0.0),
     }
     signals = ml_result.get("signals", [])
 
@@ -96,6 +168,16 @@ async def liveness_upload(
             await repo.update_transfer_status(
                 session, payment_id, "EXECUTED", provider_ref=solana_tx
             )
+        # Register payee so future transactions to the same recipient
+        # are recognised as low-risk.
+        user_id = ch_data.get("user_id", "")
+        if user_id and transfer:
+            recipient_key = (
+                f"SOLANA:{transfer.recipient_address}" if rail == "SOLANA"
+                else f"BANK:{transfer.recipient_id}"
+            )
+            await repo.add_known_recipient(session, user_id, recipient_key)
+
         # Anchor receipt
         scores_hash = hash_scores(scores)
         receipt_tx = await sol_gw.anchor_verification_receipt(
@@ -141,11 +223,10 @@ async def liveness_upload(
         await _mark_challenge_done(session, challenge_id, retry_count, decision, reasons, scores)
         await repo.delete_challenge(challenge_id)
 
-    voice = await elevenlabs_tts.speak(decision)
-
     return {
         "status": "VERIFIED",
         "decision": decision,
+        "challenge_id": challenge_id,
         "scores": scores,
         "reasons": reasons,
         "payment_id": payment_id,
@@ -153,7 +234,6 @@ async def liveness_upload(
         "rail": rail,
         "solana_tx": solana_tx,
         "verification_receipt_tx": receipt_tx,
-        "voice_audio": voice,
     }
 
 

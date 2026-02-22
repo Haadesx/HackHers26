@@ -243,3 +243,60 @@ async def create_solana_receipt(session: AsyncSession, challenge_id: str,
 async def list_all_challenges(session: AsyncSession) -> list[Challenge]:
     result = await session.execute(select(Challenge).order_by(Challenge.created_at.desc()))
     return result.scalars().all()
+
+
+# ---------------------------------------------------------------------------
+# Demo data seeding
+# ---------------------------------------------------------------------------
+async def seed_demo_data() -> None:
+    """Pre-populate the demo_user with realistic transaction history.
+
+    This ensures the first payment from the frontend doesn't get flagged
+    simply because there's no prior history. Only seeds if no transfers
+    exist yet (i.e. first run).
+    """
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(
+            select(func.count()).where(Transfer.user_id == "demo_user")
+        )
+        count = result.scalar_one() or 0
+        if count > 0:
+            return  # already seeded
+
+        logger.info("Seeding demo data for demo_user")
+
+        demo_device_id = "device_demo_default"
+        demo_recipient = "BANK:demo_recipient_001"
+
+        # Register a known device
+        session.add(Device(user_id="demo_user", device_id=demo_device_id))
+
+        # Register a known recipient
+        session.add(KnownRecipient(user_id="demo_user", recipient_key=demo_recipient))
+
+        # Create a few past executed transfers so get_financial_features
+        # returns meaningful data (avg ~$200, max ~$500)
+        now = datetime.now(timezone.utc)
+        seed_transfers = [
+            {"amount": 150.00, "days_ago": 25},
+            {"amount": 75.50,  "days_ago": 20},
+            {"amount": 200.00, "days_ago": 15},
+            {"amount": 320.00, "days_ago": 10},
+            {"amount": 95.00,  "days_ago": 5},
+            {"amount": 500.00, "days_ago": 2},
+        ]
+        for i, tx in enumerate(seed_transfers):
+            t = Transfer(
+                id=f"pay_seed_{i:03d}",
+                user_id="demo_user",
+                rail="BANK",
+                amount=tx["amount"],
+                recipient_id="demo_recipient_001",
+                note="Seed transaction",
+                status="EXECUTED",
+                created_at=now - timedelta(days=tx["days_ago"]),
+            )
+            session.add(t)
+
+        await session.commit()
+        logger.info("Demo data seeded: %d transfers, 1 device, 1 recipient", len(seed_transfers))

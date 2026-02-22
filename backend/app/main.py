@@ -9,8 +9,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.core.logging import setup_logging, get_logger
-from app.db.repo import init_db, _init_redis
+from app.db.repo import init_db, _init_redis, seed_demo_data
 from app.api import payments, liveness, audit
+from app.services import presage_service
 
 settings = get_settings()
 setup_logging(settings.DEBUG)
@@ -22,11 +23,12 @@ async def lifespan(app: FastAPI):
     """Startup / shutdown."""
     logger.info("Starting %s v%s", settings.APP_NAME, settings.VERSION)
     await init_db()
+    await seed_demo_data()
     await _init_redis()
     logger.info(
-        "Services: gemini=%s elevenlabs=%s solana=%s fiserv=%s",
+        "Services: gemini=%s presage=%s solana=%s fiserv=%s",
         "live" if settings.gemini_configured else "stub",
-        "live" if settings.elevenlabs_configured else "stub",
+        presage_service.MODE.lower(),
         "live" if settings.solana_configured else "stub",
         "live" if settings.fiserv_configured else "simulator",
     )
@@ -46,9 +48,11 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
+        "http://localhost:3001",
         "http://localhost:5173",
         "http://localhost:8080",
         "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
         "http://127.0.0.1:5173",
     ],
     allow_credentials=True,
@@ -69,7 +73,7 @@ async def health():
         "version": settings.VERSION,
         "services": {
             "gemini": "live" if settings.gemini_configured else "stub",
-            "elevenlabs": "live" if settings.elevenlabs_configured else "stub",
+            "presage": presage_service.MODE.lower(),
             "solana": "live" if settings.solana_configured else "stub",
             "bank_gateway": "fiserv" if settings.fiserv_configured else "simulator",
         },

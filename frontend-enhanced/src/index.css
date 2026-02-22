@@ -1,0 +1,33 @@
+
+/* Security Alert from Arcee Trinity */
+.security-alert {
+  background: rgba(255, 149, 0, 0.1);
+  border: 1px solid rgba(255, 149, 0, 0.3);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  text-align: left;
+}
+
+.security-alert .alert-icon {
+  font-size: 1.2rem;
+  margin-top: 2px;
+}
+
+.security-alert p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+.camera-instruction {
+  font-size: 1.1rem;
+  font-weight: 500;
+  opacity: 0.9;
+  margin: 0;
+}

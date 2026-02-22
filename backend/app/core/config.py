@@ -28,6 +28,13 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str = ""
     GEMINI_MODEL: str = "gemini-1.5-flash"
 
+    # Presage SmartSpectra
+    PRESAGE_API_KEY: str = ""
+    PRESAGE_GRPC_ENDPOINT: str = ""
+
+    # OpenRouter (Arcee Trinity)
+    OPENROUTER_API_KEY: str = ""
+
     # ElevenLabs
     ELEVENLABS_API_KEY: str = ""
     ELEVENLABS_VOICE_ID: str = "21m00Tcm4TlvDq8ikWAM"   # Rachel
@@ -41,13 +48,17 @@ class Settings(BaseSettings):
     CHALLENGE_MAX_RETRIES: int = 1
 
     # Risk thresholds
-    RISK_AMOUNT_THRESHOLD: float = 500.0
+    RISK_AMOUNT_THRESHOLD: float = 1000.0
     RISK_VELOCITY_WINDOW_SECONDS: int = 600   # 10 min
-    RISK_VELOCITY_MAX: int = 2
+    RISK_VELOCITY_MAX: int = 5
 
     @property
     def fiserv_configured(self) -> bool:
         return bool(self.FISERV_CLIENT_ID and self.FISERV_CLIENT_SECRET)
+
+    @property
+    def presage_configured(self) -> bool:
+        return bool(self.PRESAGE_API_KEY)
 
     @property
     def gemini_configured(self) -> bool:

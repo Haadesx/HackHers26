@@ -13,9 +13,11 @@ from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.core.security import generate_id
 from app.db import repo
-from app.services import gemini_risk, elevenlabs_tts
+from app.services import gemini_risk
 from app.services import gateway_fiserv as bank_gw
 from app.services import solana_service as sol_gw
+from app.services import openrouter_service
+
 
 router = APIRouter()
 logger = get_logger(__name__)
@@ -57,17 +59,25 @@ async def initiate_payment(
         session, req.user_id, settings.RISK_VELOCITY_WINDOW_SECONDS
     )
 
-    # --- Risk triggers ---
-    triggers = gemini_risk.initial_risk_triggers(
-        amount=req.amount,
-        new_payee=new_payee,
-        new_device=new_device,
-        velocity_count=velocity_count,
-        ip=req.ip,
-    )
-
-    # --- Financial features ---
+    # --- Financial features (needed for risk evaluation) ---
     fin_features = await repo.get_financial_features(session, req.user_id)
+
+    # --- New Financial Fraud Scoring Engine ---
+    tx_risk = await gemini_risk.evaluate_transaction_risk(
+        user_id=req.user_id,
+        recipient_id=req.recipient_id or str(req.recipient_address),
+        amount=req.amount,
+        transaction_id=generate_id("tx_"),
+        new_payee=new_payee
+    )
+    
+    logger.info("Transaction Risk Engine: %d%% (%s) because: %s", 
+                tx_risk.get("risk_percentage", 0), tx_risk.get("risk_level", "MEDIUM"), tx_risk.get("explanation", "missing"))
+    
+    triggers = []
+    if new_device: triggers.append("new_device")
+    if velocity_count > settings.RISK_VELOCITY_MAX: triggers.append("high_velocity")
+    if tx_risk.get("risk_percentage", 0) >= 60: triggers.append("high_fraud_score")
 
     # --- Create transfer record ---
     payment_id = generate_id("pay_")
@@ -83,7 +93,10 @@ async def initiate_payment(
         status="INITIATED",
     )
 
-    high_risk = len(triggers) > 0
+    # High risk = any hard triggers OR Gemini scores transaction risk level as MEDIUM or HIGH
+    gemini_risk_level = tx_risk.get("risk_level", "MEDIUM")
+    high_risk = len(triggers) > 0 or gemini_risk_level in ["MEDIUM", "HIGH", "CRITICAL"]
+    logger.info("high_risk=%s (risk_level=%s triggers=%s)", high_risk, gemini_risk_level, triggers)
 
     if not high_risk:
         # ---- Low risk: execute immediately ----
@@ -108,14 +121,13 @@ async def initiate_payment(
         await repo.add_device(session, req.user_id, req.device_id)
         await repo.add_known_recipient(session, req.user_id, recipient_key)
 
-        voice = await elevenlabs_tts.speak("APPROVED")
         return {
             "status": "APPROVED",
             "payment_id": payment_id,
             "payment_status": "EXECUTED",
             "rail": rail,
             "solana_tx": solana_tx,
-            "voice_audio": voice,
+            "voice_audio": None,
         }
 
     # ---- High risk: hold + challenge ----
@@ -153,6 +165,7 @@ async def initiate_payment(
     await repo.store_challenge(challenge_id, {
         "payment_id": payment_id,
         "user_id": req.user_id,
+        "amount": req.amount,
         "rail": rail,
         "triggers": triggers,
         "financial_features": fin_features,
@@ -161,10 +174,19 @@ async def initiate_payment(
         "solana_pending_id": pending_id if rail == "SOLANA" else None,
     }, ttl=settings.CHALLENGE_TTL_SECONDS + 30)
 
+    # Generate customer-facing explanation via Arcee Trinity
+    security_message = await openrouter_service.generate_security_alert(
+        amount=req.amount,
+        triggers=triggers,
+        tx_risk_level=tx_risk.get("risk_level", "HIGH"),
+        tx_risk_explanation=tx_risk.get("explanation", "High transaction risk")
+    )
+
     return {
         "status": "CHALLENGE_REQUIRED",
         "challenge_id": challenge_id,
         "prompt": "Please record a clear 3-second face video for identity verification.",
+        "security_message": security_message,
         "expires_at": expires_at.isoformat(),
         "payment_id": payment_id,
         "payment_status": "HELD",
