@@ -112,7 +112,7 @@ async def liveness_upload(
             b64 = await asyncio.to_thread(extract_middle_frame_base64, video_bytes)
             if b64:
                 return await analyze_frame_for_spoofing(b64, reference_b64=ref_b64)
-            return {"spoof_confidence": 0.0, "face_match_confidence": 1.0, "vision_flags": []}
+            return {"spoof_confidence": 0.0, "is_same_person": True, "face_match_confidence": 1.0, "face_match_reasoning": "", "vision_flags": []}
 
         ml_result, presage_result, qwen_result = await asyncio.gather(
             asyncio.to_thread(analyze_video_bytes, video_bytes),
@@ -126,7 +126,9 @@ async def liveness_upload(
             
         # Merge Qwen-VL Face Match and Spoof scores into ml_result
         ml_result["qwen_spoof_confidence"] = qwen_result["spoof_confidence"]
+        ml_result["is_same_person"] = qwen_result.get("is_same_person", True)
         ml_result["face_match_confidence"] = qwen_result.get("face_match_confidence", 1.0)
+        ml_result["face_match_reasoning"] = qwen_result.get("face_match_reasoning", "")
         if qwen_result["vision_flags"]:
             ml_result["signals"].extend(qwen_result["vision_flags"])
 
@@ -145,7 +147,9 @@ async def liveness_upload(
         "quality": ml_result["quality"],
         "presage": ml_result["presage"],
         "qwen_spoof_confidence": ml_result.get("qwen_spoof_confidence", 0.0),
+        "is_same_person": ml_result.get("is_same_person", True),
         "face_match_confidence": ml_result.get("face_match_confidence", 1.0),
+        "face_match_reasoning": ml_result.get("face_match_reasoning", ""),
     }
     signals = ml_result.get("signals", [])
 

@@ -36,7 +36,8 @@ Instead of strict static thresholds, you must holistically evaluate the risk bas
    - Any minor anomaly MUST result in a MANUAL_REVIEW or FAIL.
 
 If the user seems to just have a bad webcam (poor lighting/blur) but is otherwise human, and it's their FIRST try (retry_count=0), output "RETRY".
-If `face_match_confidence` is provided and is < 0.6, output FAIL immediately with reason 'Face does not match account owner'. Identity verification supersedes all liveness checks.
+CRITICAL ANTI-SPOOF RULE: If `qwen_spoof_confidence` is >= 0.8, output FAIL immediately. The reason MUST be "Detected physical spoofing: Face is being displayed on a digital screen, not a real physical human." This supersedes all size rules.
+If `is_same_person` is explicitly false, output FAIL immediately. The reason MUST be "Face does not match account owner: " followed by the provided `face_match_reasoning`. Identity verification supersedes all liveness checks.
 Otherwise output "PASS" for good humans, and "FAIL" for detected deepfakes/spoofing.
 
 INPUT FORMAT:
@@ -48,7 +49,9 @@ INPUT FORMAT:
     "quality": number,
     "presage": number,
     "qwen_spoof_confidence": number,
-    "face_match_confidence": number
+    "face_match_confidence": number,
+    "is_same_person": boolean,
+    "face_match_reasoning": string
   },
   "transfer_amount": number,
   "retry_count": integer

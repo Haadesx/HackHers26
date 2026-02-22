@@ -83,7 +83,8 @@ async def analyze_frame_for_spoofing(live_b64: str, reference_b64: str | None = 
     You are an elite anti-spoofing and facial recognition vision model verifying a face scan from a banking app.
     
     TASK 1: ANTI-SPOOFING
-    Look closely at the live camera frame. Is the user holding up a physical phone screen, a tablet, or a printed photo?
+    Look closely at the live camera frame. Verify this is an ACTUAL HUMAN BEING standing in real life in front of a camera, NOT a face being shown through another phone or screen.
+    Is the user holding up a physical phone screen, a tablet, or a printed photo?
     Look for:
     1. Screen bezels or device borders visible in the frame.
     2. Moiré patterns (pixel grids from screens).
@@ -99,15 +100,15 @@ async def analyze_frame_for_spoofing(live_b64: str, reference_b64: str | None = 
     TASK 2: FACE MATCHING (1:1 Identity Verification)
     You have been provided with TWO images. The FIRST image is the LIVE CAMERA FRAME. The SECOND image is the STORED REFERENCE PHOTO of the account owner.
     Compare the face in the live frame to the face in the reference photo. 
-    Are they the exact same person?
-    If they are clearly the same person, face_match_confidence should be 1.0. 
-    If they are clearly DIFFERENT people, face_match_confidence should be 0.0.
-    If you are unsure due to blur, guess conservatively around 0.5.
+    CRITICAL: You must EXPLICITLY IGNORE clothing, hats, glasses, or accessories. You are comparing the underlying human facial geometry only (bone structure, eye distance, jawline, nose shape).
+    Are these two human beings the EXACT same human being? Look closely at facial structures, eye shape, nose shape, and jawline.
     
     Return strictly JSON in the following format:
     {
         "spoof_confidence": <float 0.0 to 1.0>,
+        "is_same_person": true or false,
         "face_match_confidence": <float 0.0 to 1.0>,
+        "face_match_reasoning": "brief explanation comparing the facial features",
         "vision_flags": ["list", "of", "flags", "like", "phone_bezel_detected", "different_person_detected"]
     }
     """
@@ -167,22 +168,24 @@ async def analyze_frame_for_spoofing(live_b64: str, reference_b64: str | None = 
             data = resp.json()
             message = data["choices"][0]["message"]["content"].strip()
             
-            # Trim markdown block if returned
-            if message.startswith("```json"):
-                message = message[7:-3].strip()
-            elif message.startswith("```"):
-                message = message[3:-3].strip()
+            # Extract JSON from potential <think> blocks
+            start_idx = message.find('{')
+            end_idx = message.rfind('}')
+            if start_idx != -1 and end_idx != -1:
+                message = message[start_idx:end_idx+1]
                 
             result = json.loads(message)
             logger.info("Qwen-VL result: %s", result)
             return {
                 "spoof_confidence": float(result.get("spoof_confidence", 0.0)),
-                "face_match_confidence": float(result.get("face_match_confidence", 1.0)),
+                "is_same_person": result.get("is_same_person", True),
+                "face_match_confidence": float(result.get("face_match_confidence", result.get("confidence", 1.0))),
+                "face_match_reasoning": result.get("face_match_reasoning", result.get("reasoning", "")),
                 "vision_flags": result.get("vision_flags", [])
             }
     except Exception as exc:
         logger.error("Qwen-VL spoof analysis failed: %s", exc)
-        return {"spoof_confidence": 0.0, "face_match_confidence": 1.0, "vision_flags": []}
+        return {"spoof_confidence": 0.0, "is_same_person": True, "face_match_confidence": 1.0, "face_match_reasoning": "", "vision_flags": []}
 
 async def evaluate_risk_fallback(system_prompt: str, user_msg: str) -> str:
     """
@@ -206,8 +209,7 @@ async def evaluate_risk_fallback(system_prompt: str, user_msg: str) -> str:
             {"role": "user", "content": user_msg.strip()}
         ],
         "temperature": 0.1,
-        "max_tokens": 1000,
-        "response_format": {"type": "json_object"}
+        "max_tokens": 1000
     }
     
     logger.info("Sending risk evaluation to OpenRouter Fallback Model...")
@@ -218,10 +220,9 @@ async def evaluate_risk_fallback(system_prompt: str, user_msg: str) -> str:
         data = resp.json()
         message = data["choices"][0]["message"]["content"].strip()
         
-        # Trim markdown block if returned
-        if message.startswith("```json"):
-            message = message[7:-3].strip()
-        elif message.startswith("```"):
-            message = message[3:-3].strip()
+        start_idx = message.find('{')
+        end_idx = message.rfind('}')
+        if start_idx != -1 and end_idx != -1:
+            message = message[start_idx:end_idx+1]
             
         return message
