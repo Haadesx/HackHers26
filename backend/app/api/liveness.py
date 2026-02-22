@@ -93,12 +93,26 @@ async def liveness_upload(
         # Normal ML inference — run ML + Presage rPPG + Qwen-VL concurrently for speed
         from app.ml.infer import extract_middle_frame_base64
         from app.services.openrouter_service import analyze_frame_for_spoofing
-        
+        import os
+        import base64
+
+        # Look for a reference profile photo for 1:1 Face Matching
+        user_id = ch_data.get("user_id", "demo_user")
+        ref_b64 = None
+        profile_path = f"app/static/profiles/{user_id}.jpg"
+        if os.path.exists(profile_path):
+            try:
+                with open(profile_path, "rb") as f:
+                    ref_b64 = base64.b64encode(f.read()).decode('utf-8')
+                logger.info("Found reference profile photo for user: %s", user_id)
+            except Exception as e:
+                logger.warning("Failed to load reference photo for %s: %s", user_id, e)
+
         async def qwen_task():
             b64 = await asyncio.to_thread(extract_middle_frame_base64, video_bytes)
             if b64:
-                return await analyze_frame_for_spoofing(b64)
-            return {"spoof_confidence": 0.0, "vision_flags": []}
+                return await analyze_frame_for_spoofing(b64, reference_b64=ref_b64)
+            return {"spoof_confidence": 0.0, "face_match_confidence": 1.0, "vision_flags": []}
 
         ml_result, presage_result, qwen_result = await asyncio.gather(
             asyncio.to_thread(analyze_video_bytes, video_bytes),
@@ -110,8 +124,9 @@ async def liveness_upload(
         if presage_result["spoofing_flags"]:
             ml_result["signals"].extend(presage_result["spoofing_flags"])
             
-        # Merge Qwen-VL score into ml_result
+        # Merge Qwen-VL Face Match and Spoof scores into ml_result
         ml_result["qwen_spoof_confidence"] = qwen_result["spoof_confidence"]
+        ml_result["face_match_confidence"] = qwen_result.get("face_match_confidence", 1.0)
         if qwen_result["vision_flags"]:
             ml_result["signals"].extend(qwen_result["vision_flags"])
 
@@ -130,6 +145,7 @@ async def liveness_upload(
         "quality": ml_result["quality"],
         "presage": ml_result["presage"],
         "qwen_spoof_confidence": ml_result.get("qwen_spoof_confidence", 0.0),
+        "face_match_confidence": ml_result.get("face_match_confidence", 1.0),
     }
     signals = ml_result.get("signals", [])
 
@@ -234,6 +250,55 @@ async def liveness_upload(
         "rail": rail,
         "solana_tx": solana_tx,
         "verification_receipt_tx": receipt_tx,
+    }
+
+
+@router.post("/liveness/score")
+async def liveness_score(video: UploadFile = File(...)):
+    """
+    Dedicated endpoint for the iOS app embedded backend.
+    Runs ML + Presage + Qwen-VL concurrently and returns the raw scoring JSON.
+    """
+    video_bytes = await video.read()
+    
+    from app.ml.infer import extract_middle_frame_base64
+    from app.services.openrouter_service import analyze_frame_for_spoofing
+    
+    async def qwen_task():
+        b64 = await asyncio.to_thread(extract_middle_frame_base64, video_bytes)
+        if b64:
+            return await analyze_frame_for_spoofing(b64)
+        return {"spoof_confidence": 0.0, "vision_flags": []}
+
+    ml_result, presage_result, qwen_result = await asyncio.gather(
+        asyncio.to_thread(analyze_video_bytes, video_bytes),
+        presage_service.analyze_liveness(video_bytes),
+        qwen_task()
+    )
+    
+    # Merge Presage score
+    ml_result["presage"] = presage_result["presage_score"]
+    if presage_result["spoofing_flags"]:
+        ml_result["signals"].extend(presage_result["spoofing_flags"])
+            
+    # Merge Qwen-VL score
+    ml_result["qwen_spoof_confidence"] = qwen_result["spoof_confidence"]
+    if qwen_result["vision_flags"]:
+        ml_result["signals"].extend(qwen_result["vision_flags"])
+
+    scores = {
+        "deepfake_mean": ml_result["deepfake_mean"],
+        "deepfake_var": ml_result["deepfake_var"],
+        "liveness": ml_result["liveness"],
+        "quality": ml_result["quality"],
+        "presage": ml_result["presage"],
+        "qwen_spoof_confidence": ml_result.get("qwen_spoof_confidence", 0.0),
+    }
+    signals = ml_result.get("signals", [])
+    
+    return {
+        "scores": scores,
+        "signals": signals
     }
 
 

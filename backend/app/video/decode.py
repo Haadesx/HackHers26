@@ -5,6 +5,13 @@ import os
 from typing import Optional
 
 
+def _get_suffix(video_bytes: bytes) -> str:
+    # WebM magic number
+    if video_bytes.startswith(b'\x1a\x45\xdf\xa3'):
+        return '.webm'
+    # QuickTime / MP4 headers
+    return '.mp4'
+
 def decode_video_bytes(video_bytes: bytes) -> tuple[bool, Optional[np.ndarray], list[str]]:
     """
     Decode video bytes using OpenCV.
@@ -14,7 +21,8 @@ def decode_video_bytes(video_bytes: bytes) -> tuple[bool, Optional[np.ndarray], 
     """
     signals = []
     
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_file:
+    suffix = _get_suffix(video_bytes)
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
         tmp_file.write(video_bytes)
         tmp_path = tmp_file.name
     
@@ -50,7 +58,8 @@ def decode_video_bytes(video_bytes: bytes) -> tuple[bool, Optional[np.ndarray], 
 
 def get_video_info(video_bytes: bytes) -> dict:
     """Get video metadata without full decode."""
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_file:
+    suffix = _get_suffix(video_bytes)
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
         tmp_file.write(video_bytes)
         tmp_path = tmp_file.name
     

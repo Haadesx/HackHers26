@@ -51,9 +51,12 @@ app.add_middleware(
         "http://localhost:3001",
         "http://localhost:5173",
         "http://localhost:8080",
+        "http://localhost:8000",
         "http://127.0.0.1:3000",
         "http://127.0.0.1:3001",
         "http://127.0.0.1:5173",
+        "http://127.0.0.1:8000",
+        "*",  # Allow iOS simulator
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -77,4 +80,11 @@ async def health():
             "solana": "live" if settings.solana_configured else "stub",
             "bank_gateway": "fiserv" if settings.fiserv_configured else "simulator",
         },
+    }
+
+@app.get("/", tags=["System"])
+async def root():
+    return {
+        "message": "SecurePay API is running.",
+        "docs": "/docs"
     }

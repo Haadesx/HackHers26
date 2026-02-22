@@ -1,0 +1,367 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 63;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		059A9DC8E1996F1792FED4A5 /* AuditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 874C6ABFD6B6331D928D88A9 /* AuditView.swift */; };
+		494A4E096B8DC378E302A7C2 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180A722DD98C46AC052AC497 /* DesignSystem.swift */; };
+		4E316B37F1B4539EF24876FD /* ReceiptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3317057E2B7DD51E6EAABE /* ReceiptView.swift */; };
+		6171C09FA288C810FAD49C34 /* ScoreCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AA26B29AE8A9CA94FE822D1 /* ScoreCardView.swift */; };
+		63B667C7E427CB5ECD2E427F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 905B3A281F93C1AA82B1B2E3 /* ContentView.swift */; };
+		6566537119437B5D5D160D4E /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA5525DE0246F8425C532861 /* HomeView.swift */; };
+		B929CEE1DC4CD4C2C886C920 /* SecurePayApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA445A3FB25164F9B2EA112D /* SecurePayApp.swift */; };
+		BB6D70F50041EC2397087405 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D478FD3C3224EC574F225F98 /* NetworkManager.swift */; };
+		C04BE502EBEF53F982E0A878 /* AuditDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378724CD8955737A2E4D7E57 /* AuditDetailView.swift */; };
+		C19DEF6628012535C884A7AD /* ResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A071201B8D929B788DF204EC /* ResultView.swift */; };
+		CC27CBCE8755D4AAFB2AAD37 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A7FD3B99B36A265BDCBF154B /* Assets.xcassets */; };
+		DA17E4F32B943FCEDDD4C1BF /* SendMoneyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26785243AD42195A37AC7D0B /* SendMoneyView.swift */; };
+		EB409B1ECC4B5A57F3377407 /* EmbeddedBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8DC80D07F6C41FC2AFC8766 /* EmbeddedBackend.swift */; };
+		F41C9F520092801756B0DD34 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DC8CB20A21256E50A231B76 /* Models.swift */; };
+		F6AECC65BAEEA5AC6E81C5F6 /* SecurityCheckOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = E007234B1FA7F5C26D2B5793 /* SecurityCheckOverlay.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0DC8CB20A21256E50A231B76 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		180A722DD98C46AC052AC497 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
+		1AA26B29AE8A9CA94FE822D1 /* ScoreCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreCardView.swift; sourceTree = "<group>"; };
+		26785243AD42195A37AC7D0B /* SendMoneyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendMoneyView.swift; sourceTree = "<group>"; };
+		378724CD8955737A2E4D7E57 /* AuditDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditDetailView.swift; sourceTree = "<group>"; };
+		4A3317057E2B7DD51E6EAABE /* ReceiptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiptView.swift; sourceTree = "<group>"; };
+		5DA4CD5FA876022D3672D835 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		874C6ABFD6B6331D928D88A9 /* AuditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditView.swift; sourceTree = "<group>"; };
+		905B3A281F93C1AA82B1B2E3 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A071201B8D929B788DF204EC /* ResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultView.swift; sourceTree = "<group>"; };
+		A7FD3B99B36A265BDCBF154B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		BA5525DE0246F8425C532861 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		D478FD3C3224EC574F225F98 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
+		DD686B2C67AF0C5DE5D3447B /* SecurePay.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SecurePay.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E007234B1FA7F5C26D2B5793 /* SecurityCheckOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityCheckOverlay.swift; sourceTree = "<group>"; };
+		E8DC80D07F6C41FC2AFC8766 /* EmbeddedBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbeddedBackend.swift; sourceTree = "<group>"; };
+		FA445A3FB25164F9B2EA112D /* SecurePayApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurePayApp.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0E88746078989D5E784FAF73 = {
+			isa = PBXGroup;
+			children = (
+				EB042E12826C7FEECD62C75B /* SecurePay */,
+				77A446DAE00E5CFA7C5271A8 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		77A446DAE00E5CFA7C5271A8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DD686B2C67AF0C5DE5D3447B /* SecurePay.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EB042E12826C7FEECD62C75B /* SecurePay */ = {
+			isa = PBXGroup;
+			children = (
+				A7FD3B99B36A265BDCBF154B /* Assets.xcassets */,
+				378724CD8955737A2E4D7E57 /* AuditDetailView.swift */,
+				874C6ABFD6B6331D928D88A9 /* AuditView.swift */,
+				905B3A281F93C1AA82B1B2E3 /* ContentView.swift */,
+				180A722DD98C46AC052AC497 /* DesignSystem.swift */,
+				E8DC80D07F6C41FC2AFC8766 /* EmbeddedBackend.swift */,
+				BA5525DE0246F8425C532861 /* HomeView.swift */,
+				5DA4CD5FA876022D3672D835 /* Info.plist */,
+				0DC8CB20A21256E50A231B76 /* Models.swift */,
+				D478FD3C3224EC574F225F98 /* NetworkManager.swift */,
+				4A3317057E2B7DD51E6EAABE /* ReceiptView.swift */,
+				A071201B8D929B788DF204EC /* ResultView.swift */,
+				1AA26B29AE8A9CA94FE822D1 /* ScoreCardView.swift */,
+				FA445A3FB25164F9B2EA112D /* SecurePayApp.swift */,
+				E007234B1FA7F5C26D2B5793 /* SecurityCheckOverlay.swift */,
+				26785243AD42195A37AC7D0B /* SendMoneyView.swift */,
+			);
+			path = SecurePay;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		03D585E290679243C117F2EA /* SecurePay */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0E892AC6513526853A8C687A /* Build configuration list for PBXNativeTarget "SecurePay" */;
+			buildPhases = (
+				8A83B6042E31F12284EB8123 /* Sources */,
+				0C275FE422FAA103ECA75249 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SecurePay;
+			packageProductDependencies = (
+			);
+			productName = SecurePay;
+			productReference = DD686B2C67AF0C5DE5D3447B /* SecurePay.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C811597958A6FC639A5435C1 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2620;
+				TargetAttributes = {
+					03D585E290679243C117F2EA = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 4936F62E2EB7840B04EFFE67 /* Build configuration list for PBXProject "SecurePay" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 0E88746078989D5E784FAF73;
+			minimizedProjectReferenceProxies = 1;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				03D585E290679243C117F2EA /* SecurePay */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		0C275FE422FAA103ECA75249 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CC27CBCE8755D4AAFB2AAD37 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8A83B6042E31F12284EB8123 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C04BE502EBEF53F982E0A878 /* AuditDetailView.swift in Sources */,
+				059A9DC8E1996F1792FED4A5 /* AuditView.swift in Sources */,
+				63B667C7E427CB5ECD2E427F /* ContentView.swift in Sources */,
+				494A4E096B8DC378E302A7C2 /* DesignSystem.swift in Sources */,
+				EB409B1ECC4B5A57F3377407 /* EmbeddedBackend.swift in Sources */,
+				6566537119437B5D5D160D4E /* HomeView.swift in Sources */,
+				F41C9F520092801756B0DD34 /* Models.swift in Sources */,
+				BB6D70F50041EC2397087405 /* NetworkManager.swift in Sources */,
+				4E316B37F1B4539EF24876FD /* ReceiptView.swift in Sources */,
+				C19DEF6628012535C884A7AD /* ResultView.swift in Sources */,
+				6171C09FA288C810FAD49C34 /* ScoreCardView.swift in Sources */,
+				B929CEE1DC4CD4C2C886C920 /* SecurePayApp.swift in Sources */,
+				F6AECC65BAEEA5AC6E81C5F6 /* SecurityCheckOverlay.swift in Sources */,
+				DA17E4F32B943FCEDDD4C1BF /* SendMoneyView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1F506AACC8A024748161D5F1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = SecurePay/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.hackHers.securepay;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3CDCE2F6A698BED648795EB2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 9R7RGMB3U2;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		6B186FDECBE07B6B64E8A395 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = SecurePay/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.hackHers.securepay;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		8276C1A7A1D2AC63C125568D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 9R7RGMB3U2;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0E892AC6513526853A8C687A /* Build configuration list for PBXNativeTarget "SecurePay" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1F506AACC8A024748161D5F1 /* Debug */,
+				6B186FDECBE07B6B64E8A395 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		4936F62E2EB7840B04EFFE67 /* Build configuration list for PBXProject "SecurePay" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8276C1A7A1D2AC63C125568D /* Debug */,
+				3CDCE2F6A698BED648795EB2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C811597958A6FC639A5435C1 /* Project object */;
+}

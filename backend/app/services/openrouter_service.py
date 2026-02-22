@@ -71,17 +71,19 @@ async def generate_security_alert(
         logger.error("OpenRouter alert generation failed: %s", exc)
         return "For your security, please complete a face scan to authorize this unusual transaction."
 
-async def analyze_frame_for_spoofing(base64_img: str) -> dict:
+async def analyze_frame_for_spoofing(live_b64: str, reference_b64: str | None = None) -> dict:
     """
-    Sends a base64 encoded frame to Qwen-VL via OpenRouter to detect 
-    physical spoofing attacks (e.g. screens, printed photos).
+    Sends a base64 encoded frame (and optionally a reference photo) to Qwen-VL via OpenRouter 
+    to detect physical spoofing attacks and optionally perform 1:1 face matching.
     """
     if not settings.OPENROUTER_API_KEY:
-        return {"spoof_confidence": 0.0, "vision_flags": []}
+        return {"spoof_confidence": 0.0, "vision_flags": [], "face_match_confidence": 1.0}
 
     prompt = """
-    You are an elite anti-spoofing vision model verifying a face scan from a banking app.
-    Look closely at this image. Is the user holding up a physical phone screen, a tablet, or a printed photo?
+    You are an elite anti-spoofing and facial recognition vision model verifying a face scan from a banking app.
+    
+    TASK 1: ANTI-SPOOFING
+    Look closely at the live camera frame. Is the user holding up a physical phone screen, a tablet, or a printed photo?
     Look for:
     1. Screen bezels or device borders visible in the frame.
     2. Moiré patterns (pixel grids from screens).
@@ -90,11 +92,31 @@ async def analyze_frame_for_spoofing(base64_img: str) -> dict:
     
     If it appears to be a real human face captured live by a webcam/phone, spoof_confidence should be 0.0.
     If it is clearly a photo or video being displayed on another screen, spoof_confidence should be high (0.8 - 1.0).
+    """
 
+    if reference_b64:
+        prompt += """
+    TASK 2: FACE MATCHING (1:1 Identity Verification)
+    You have been provided with TWO images. The FIRST image is the LIVE CAMERA FRAME. The SECOND image is the STORED REFERENCE PHOTO of the account owner.
+    Compare the face in the live frame to the face in the reference photo. 
+    Are they the exact same person?
+    If they are clearly the same person, face_match_confidence should be 1.0. 
+    If they are clearly DIFFERENT people, face_match_confidence should be 0.0.
+    If you are unsure due to blur, guess conservatively around 0.5.
+    
     Return strictly JSON in the following format:
     {
         "spoof_confidence": <float 0.0 to 1.0>,
-        "vision_flags": ["list", "of", "flags", "like", "phone_bezel_detected", "moire_pattern"]
+        "face_match_confidence": <float 0.0 to 1.0>,
+        "vision_flags": ["list", "of", "flags", "like", "phone_bezel_detected", "different_person_detected"]
+    }
+    """
+    else:
+        prompt += """
+    Return strictly JSON in the following format:
+    {
+        "spoof_confidence": <float 0.0 to 1.0>,
+        "vision_flags": ["list", "of", "flags", "like", "phone_bezel_detected"]
     }
     """
 
@@ -105,20 +127,30 @@ async def analyze_frame_for_spoofing(base64_img: str) -> dict:
         "X-Title": "DeepfakeGate"
     }
 
+    content_array = [
+        {"type": "text", "text": prompt.strip()},
+        {
+            "type": "image_url",
+            "image_url": {
+                "url": f"data:image/jpeg;base64,{live_b64}"
+            }
+        }
+    ]
+
+    if reference_b64:
+        content_array.append({
+            "type": "image_url",
+            "image_url": {
+                "url": f"data:image/jpeg;base64,{reference_b64}"
+            }
+        })
+
     payload = {
         "model": "qwen/qwen3-vl-30b-a3b-thinking",
         "messages": [
             {
                 "role": "user",
-                "content": [
-                    {"type": "text", "text": prompt.strip()},
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/jpeg;base64,{base64_img}"
-                        }
-                    }
-                ]
+                "content": content_array
             }
         ],
         "temperature": 0.1,
@@ -145,11 +177,12 @@ async def analyze_frame_for_spoofing(base64_img: str) -> dict:
             logger.info("Qwen-VL result: %s", result)
             return {
                 "spoof_confidence": float(result.get("spoof_confidence", 0.0)),
+                "face_match_confidence": float(result.get("face_match_confidence", 1.0)),
                 "vision_flags": result.get("vision_flags", [])
             }
     except Exception as exc:
         logger.error("Qwen-VL spoof analysis failed: %s", exc)
-        return {"spoof_confidence": 0.0, "vision_flags": []}
+        return {"spoof_confidence": 0.0, "face_match_confidence": 1.0, "vision_flags": []}
 
 async def evaluate_risk_fallback(system_prompt: str, user_msg: str) -> str:
     """

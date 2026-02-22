@@ -8,7 +8,8 @@ export default function Home() {
   const [rail, setRail] = useState<'BANK' | 'SOLANA'>('BANK')
   const [userId, setUserId] = useState('demo_user')
   const [amount, setAmount] = useState('')
-  const [recipientId, setRecipientId] = useState('')
+  const [accountNumber, setAccountNumber] = useState('')
+  const [routingNumber, setRoutingNumber] = useState('')
   const [recipientAddress, setRecipientAddress] = useState('')
   const [note, setNote] = useState('')
   const [loading, setLoading] = useState(false)
@@ -25,9 +26,9 @@ export default function Home() {
         user_id: userId,
         rail,
         amount: parseFloat(amount),
-        recipient_id: rail === 'BANK' ? recipientId : undefined,
+        recipient_id: rail === 'BANK' ? accountNumber : undefined,
         recipient_address: rail === 'SOLANA' ? recipientAddress : null,
-        note,
+        note: rail === 'BANK' && routingNumber ? `Routing: ${routingNumber} ${note ? '| ' + note : ''}` : note,
         device_id: getDeviceId(),
         user_agent: navigator.userAgent,
         ip: null,
@@ -134,20 +135,36 @@ export default function Home() {
 
           {/* Conditional Recipient Fields */}
           {rail === 'BANK' ? (
-            <div className="form-group">
-              <label className="form-label">
-                <span className="label-icon">🏦</span>
-                Recipient ID
-              </label>
-              <input
-                type="text"
-                className="form-input"
-                value={recipientId}
-                onChange={(e) => setRecipientId(e.target.value)}
-                placeholder="Enter recipient bank ID"
-                required
-              />
-            </div>
+            <>
+              <div className="form-group">
+                <label className="form-label">
+                  <span className="label-icon">🏦</span>
+                  Account Number
+                </label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={accountNumber}
+                  onChange={(e) => setAccountNumber(e.target.value)}
+                  placeholder="Enter recipient account number"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">
+                  <span className="label-icon">🏢</span>
+                  Routing Number
+                </label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={routingNumber}
+                  onChange={(e) => setRoutingNumber(e.target.value)}
+                  placeholder="Enter 9-digit routing number"
+                  required
+                />
+              </div>
+            </>
           ) : (
             <div className="form-group">
               <label className="form-label">

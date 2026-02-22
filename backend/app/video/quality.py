@@ -15,7 +15,8 @@ def compute_blur_score(roi: np.ndarray) -> float:
     laplacian = cv2.Laplacian(gray, cv2.CV_64F)
     variance = laplacian.var()
     
-    normalized = min(variance / 500.0, 1.0)
+    # Lowered from 500 to 150 to be more forgiving for webcams
+    normalized = min(variance / 150.0, 1.0)
     return normalized
 
 
@@ -30,7 +31,8 @@ def compute_brightness_score(roi: np.ndarray) -> float:
     gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY) if len(roi.shape) == 3 else roi
     mean_intensity = np.mean(gray)
     
-    optimal_low, optimal_high = 80, 180
+    # Widened from 80-180 to 50-200 to allow dimmer/brighter indoor lighting
+    optimal_low, optimal_high = 50, 200
     if optimal_low <= mean_intensity <= optimal_high:
         return 1.0
     elif mean_intensity < optimal_low:
